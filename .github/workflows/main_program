@@ -1,0 +1,11 @@
+# Python Data Analysis for TWSE Stock Market
+
+import Module_1
+import Module_2  
+import Module_3 
+
+df = Module_1.SQLFetch(2020, 1, 2024, 4, 2330)
+plt, sma_20, sma_60, ax = Module_2.FigProcess(df, 2330)
+plt = Module_3.Annotate(plt, df, sma_20, sma_60, ax)
+
+plt.show()
