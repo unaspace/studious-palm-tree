@@ -1,0 +1,38 @@
+import matplotlib
+import matplotlib.pyplot as plt
+import mpl_finance as mpf
+import pandas as pd
+from sqlalchemy import create_engine
+
+def FigProcess(df, stockNo):
+    # 連接數據庫
+    engine = create_engine('sqlite:///Stock_Data.db', echo=False)
+    df = pd.read_sql_query("SELECT * FROM 'Stock_Data'", engine, index_col = 'date')
+
+    # 計算移動平均線
+    sma_20 = df['Close'].rolling(window=20).mean()
+    sma_60 = df['Close'].rolling(window=60).mean()
+
+    # 圖大小
+    fig = plt.figure(figsize=(24, 15))
+    ax = fig.add_axes([0,0.2,1,0.5])
+    ax2 = fig.add_axes([0,0,1,0.2])
+
+    # k線圖
+    ax.set_xticks(range(0, len(df.index), 20))
+    ax.set_xticklabels(df.index[::20])
+    mpf.candlestick2_ochl(ax, df['Open'], df['Close'], df['High'],
+                              df['Low'], width=0.6, colorup='r', colordown='g', alpha=0.75)
+
+    # 畫出移動平均線
+    ax.plot(sma_20, label='20-day Moving Average')
+    ax.plot(sma_60, label='60-day Moving Average')
+
+    # 成交量
+    mpf.volume_overlay(ax2, df['Open'], df['Close'], df['Volume'], colorup='r', colordown='g', width=0.5, alpha=0.8)
+    ax2.set_xticks(range(0, len(df.index), 60))
+    ax2.set_xticklabels(df.index[::60])
+    plt.title(str(stockNo),fontsize=25, fontweight='bold', loc='center')
+
+    return plt, sma_20, sma_60, ax
+
